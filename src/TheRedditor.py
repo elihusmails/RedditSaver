@@ -31,18 +31,25 @@ if __name__ == '__main__':
     
     for s in submissions:
 
+        print s.subreddit
+
         if 'imgur.com' in s.url:
             print 'Found a match ' + s.url
             theUrl = s.url.encode('ascii','ignore')
             
-            if theUrl.endswith('.jpg') or theUrl.endswith('.gif'):
-                downloadImage( s.url, username )
+            if theUrl.endswith('.jpg') or theUrl.endswith('.gif') or theUrl.endswith('.png') or theUrl.endswith('jpeg'):
+                
+                path = username + '/' + str(s.subreddit)
+                downloadImage( s.url, path )
             else:
+                
+                path = username + '/' + str(s.subreddit)
+                
                 try:
                     downloader = ImgurAlbumDownloader(s.url)
-                    downloader.save_images(username)
+                    downloader.save_images(path)
                 except ImgurAlbumException:
-                    downloadImage( s.url+'.jpg', username )
+                    downloadImage( s.url+'.jpg', path )
                 
-            s.unsave()
+#            s.unsave()
             
