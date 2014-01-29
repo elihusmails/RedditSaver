@@ -51,5 +51,5 @@ if __name__ == '__main__':
                 except ImgurAlbumException:
                     downloadImage( s.url+'.jpg', path )
                 
-#            s.unsave()
+            s.unsave()
             
