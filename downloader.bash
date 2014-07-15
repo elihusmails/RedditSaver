@@ -4,7 +4,7 @@ while :
 do
 
   echo "Starting another download"
-  python TheRedditor.py
+  phangbyte	
   sleep 300
 
 done

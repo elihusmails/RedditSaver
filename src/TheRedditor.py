@@ -3,9 +3,62 @@ from urlparse import urlparse
 from posixpath import basename
 import os, sys
 import requests
-from praw import Reddit
+import praw
+import praw.errors
 from imguralbum import ImgurAlbumDownloader
 from imguralbum import ImgurAlbumException
+from pprint import pprint
+from urlparse import urlparse
+from markdown.inlinepatterns import LINK_RE
+import argparse
+import re
+
+
+def get_comments(submission, limit=None, threshold=0):
+    submission.replace_more_comments(limit=limit, threshold=threshold)
+    return praw.helpers.flatten_tree(submission.comments)
+
+def extract_urls(md):
+    urls = re.findall(LINK_RE, md)
+    if urls:
+        urls = [u[7].strip() for u in urls]
+
+    return urls
+
+def scanCommentsForLinks( submission ):
+    
+    print submission.title
+    print submission.url
+#     flat_comments = praw.helpers.flatten_tree(submission.comments)
+    comments = get_comments(submission)
+    
+    links = []
+      
+    for comment in comments:
+        
+        if not isinstance(comment, praw.objects.Comment):
+            print "Comment is not an instance of praw.Comment"
+            continue
+        
+#        if no hasattr(comment, 'body'):
+#            continue
+        
+#         print 'Author: ' + str(comment.author)
+        print 'Comment: ' + comment.body
+
+        # First pass.  This will process the comment using markdown
+        urls = extract_urls(comment.body)
+        links.extend(urls)
+        
+        # Second pass.  Just look for "http://" in the comment
+        text = comment.body.split()
+        for word in text:
+            if 'http://' in word:
+                links.append(word)
+                
+    print "Links = " + str(links)
+    return links
+
 def downloadImage( url, username ):
         
     o = urlparse(url)
@@ -21,17 +74,28 @@ def downloadImage( url, username ):
     f.write(r.content)
     f.close()
 
+
 if __name__ == '__main__':
     username = sys.argv[1]
     password = sys.argv[2]
 
-    r = Reddit(user_agent=username)
+    r = praw.Reddit(user_agent=username)
+    r.config._ssl_url = None
     r.login(username, password)
     submissions = r.user.get_saved( limit=1000 )
     
     for s in submissions:
 
-        print s.subreddit
+        #print s.subreddit
+        #print dir(s)
+
+        '''
+        Fields in a Submission object:
+        ['__class__', '__delattr__', '__dict__', '__doc__', '__eq__', '__format__', '__getattr__', '__getattribute__', '__hash__', '__init__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__unicode__', '__weakref__', '_comment_sort', '_comments', '_comments_by_id', '_extract_more_comments', '_get_json_dict', '_info_url', '_insert_comment', '_orphaned', '_populate', '_replaced_more', '_underscore_names', '_update_comments', 'add_comment', 'approve', 'approved_by', 'author', 'author_flair_css_class', 'author_flair_text', 'banned_by', 'clear_vote', 'clicked', 'comments', 'created', 'created_utc', 'delete', 'distinguish', 'distinguished', 'domain', 'downs', 'downvote', 'edit', 'edited', 'from_api_response', 'from_id', 'from_url', 'fullname', 'get_duplicates', 'gilded', 'has_fetched', 'hidden', 'hide', 'id', 'ignore_reports', 'is_self', 'json_dict', 'likes', 'link_flair_css_class', 'link_flair_text', 'mark_as_nsfw', 'media', 'media_embed', 'name', 'num_comments', 'num_reports', 'over_18', 'permalink', 'reddit_session', 'refresh', 'remove', 'replace_more_comments', 'report', 'save', 'saved', 'score', 'secure_media', 'secure_media_embed', 'selftext', 'selftext_html', 'set_contest_mode', 'set_flair', 'short_link', 'stickied', 'sticky', 'subreddit', 'subreddit_id', 'thumbnail', 'title', 'undistinguish', 'unhide', 'unignore_reports', 'unmark_as_nsfw', 'unsave', 'unset_contest_mode', 'unsticky', 'ups', 'upvote', 'url', 'visited', 'vote']
+        '''
+        
+        if not hasattr(s, 'url'):
+            continue
 
         if 'imgur.com' in s.url:
             print 'Found a match ' + s.url
@@ -50,6 +114,15 @@ if __name__ == '__main__':
                     downloader.save_images(path)
                 except ImgurAlbumException:
                     downloadImage( s.url+'.jpg', path )
-                
-            s.unsave()
+            
+            urls = scanCommentsForLinks( s )
+            print urls
+            for u in urls:
+                try:
+                    r.submit(sys.argv[3], url=u, title=s.title)
+                except praw.errors.APIException:
+                    print "Most likely an invalid URL"
+                except praw.errors.AlreadySubmitted:
+                    print "Link already submitted"
+            #s.unsave()
             
