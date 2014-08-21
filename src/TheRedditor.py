@@ -89,11 +89,6 @@ if __name__ == '__main__':
         #print s.subreddit
         #print dir(s)
 
-        '''
-        Fields in a Submission object:
-        ['__class__', '__delattr__', '__dict__', '__doc__', '__eq__', '__format__', '__getattr__', '__getattribute__', '__hash__', '__init__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__unicode__', '__weakref__', '_comment_sort', '_comments', '_comments_by_id', '_extract_more_comments', '_get_json_dict', '_info_url', '_insert_comment', '_orphaned', '_populate', '_replaced_more', '_underscore_names', '_update_comments', 'add_comment', 'approve', 'approved_by', 'author', 'author_flair_css_class', 'author_flair_text', 'banned_by', 'clear_vote', 'clicked', 'comments', 'created', 'created_utc', 'delete', 'distinguish', 'distinguished', 'domain', 'downs', 'downvote', 'edit', 'edited', 'from_api_response', 'from_id', 'from_url', 'fullname', 'get_duplicates', 'gilded', 'has_fetched', 'hidden', 'hide', 'id', 'ignore_reports', 'is_self', 'json_dict', 'likes', 'link_flair_css_class', 'link_flair_text', 'mark_as_nsfw', 'media', 'media_embed', 'name', 'num_comments', 'num_reports', 'over_18', 'permalink', 'reddit_session', 'refresh', 'remove', 'replace_more_comments', 'report', 'save', 'saved', 'score', 'secure_media', 'secure_media_embed', 'selftext', 'selftext_html', 'set_contest_mode', 'set_flair', 'short_link', 'stickied', 'sticky', 'subreddit', 'subreddit_id', 'thumbnail', 'title', 'undistinguish', 'unhide', 'unignore_reports', 'unmark_as_nsfw', 'unsave', 'unset_contest_mode', 'unsticky', 'ups', 'upvote', 'url', 'visited', 'vote']
-        '''
-        
         if not hasattr(s, 'url'):
             continue
 
